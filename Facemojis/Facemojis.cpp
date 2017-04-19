@@ -102,12 +102,15 @@ void placePicture ( int x , int y , float radius , Mode mode )
 	cv::Rect roi ( cv::Point ( xpos , ypos ) , imgresize.size ( ) );
 	cv::Mat4b temp = imgresize;
 	cv::Mat3b dst = nextInput ( roi );
+	// Pour chaque ligne
 	for ( int r = 0; r < dst.rows; ++r )
 	{
+		// pour chaque colonne
 		for ( int c = 0; c < dst.cols; ++c )
 		{
+			// on récupère les channels
 			const cv::Vec4b& vf = temp ( r , c );
-			if ( vf [ 3 ] > 0 ) // alpha channel > 0
+			if ( vf [ 3 ] > 0 ) // si alpha channel > 0
 			{
 				// Blending
 				cv::Vec3b& vb = dst ( r , c );
@@ -148,7 +151,7 @@ int video ( char* videoname )
 	{
 		// - > faire les traitements sur l’image (prochaines étapes)
 
-		placePicture ( 50 , 50 , 50 , SMILE );
+		placePicture ( 100 , 100 , 150 , SMILE );
 
 		// - > appeler la fonction de dessin
 		cv::imshow ( "input" , nextInput );
