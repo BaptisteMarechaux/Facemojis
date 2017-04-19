@@ -15,9 +15,11 @@ cv::Mat nextInput;
 /// </summary>
 enum Mode
 {
-	None , /// Pas d'image
-	Normal , /// Image de base
-	Smile /// Image avec un sourire
+	NONE , /// Pas d'image
+	NEUTRAL , /// Image de base
+	SMILE , /// Image avec un sourire
+	WINK , /// Image avec cli d'oeil
+	SAD /// Image avec sad
 };
 
 /// <summary>
