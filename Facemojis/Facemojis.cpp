@@ -8,6 +8,11 @@
 #include <opencv2\imgproc\imgproc.hpp>
 #include <opencv2\video\video.hpp>
 
+const cv::String NEUTRAL_PATH = "./Emoji/neutral.png";
+const cv::String SMILE_PATH = "./Emoji/smile.png";
+const cv::String WINK_PATH = "./Emoji/wink.png";
+const cv::String SAD_PATH = "./Emoji/sad.png";
+
 cv::Mat nextInput;
 
 /// <summary>
@@ -29,9 +34,37 @@ enum Mode
 /// <param name="radius">Le scale de l'image à effectuer.</param>
 /// <param name="mode">L'image à utiliser.</param>
 /// </summary>
-void placePicture ( cv::Mat position , float angle , float radius , Mode mode )
+void placePicture ( int x , int y , float angle , float radius , Mode mode )
 {
-	// prototype
+	// Si pas d'image à mettre en superposition osef !
+	if ( mode == NONE )
+		return;
+
+	// trouver le path nécessaire
+	cv::String pathtoload;
+	switch ( mode )
+	{
+		case SMILE:
+			pathtoload = SMILE_PATH;
+			break;
+		case WINK:
+			pathtoload = WINK_PATH;
+			break;
+		case SAD:
+			pathtoload = SAD_PATH;
+			break;
+		case NEUTRAL:
+		default:
+			pathtoload = NEUTRAL_PATH;
+			break;
+	}
+
+	// 1 load l'image nécessaire
+	cv::Mat img = cv::imread ( pathtoload );
+	cv::imshow ( "Output" , img );
+	// 2 resize l'image
+	// 3 rotate l'image
+	// 4 appliquer l'image
 }
 
 /// <summary>
@@ -40,9 +73,9 @@ void placePicture ( cv::Mat position , float angle , float radius , Mode mode )
 /// <param name="angle">L'angle de rotation de l'image à incorporer.</param>
 /// <param name="mode">L'image à utiliser.</param>
 /// </summary>
-void placePiture ( cv::Mat position , float angle , Mode mode )
+void placePicture ( int x , int y , float angle , Mode mode )
 {
-	placePicture ( position , angle , 10.0 , mode );
+	placePicture ( x , y , angle , 10.0f , mode );
 }
 
 /// <summary>
@@ -50,9 +83,9 @@ void placePiture ( cv::Mat position , float angle , Mode mode )
 /// <param name="position">Le centre du cercle à remplir avec une image.</param>
 /// <param name="mode">L'image à utiliser.</param>
 /// </summary>
-void placePiture ( cv::Mat position , Mode mode )
+void placePicture ( int x , int y , Mode mode )
 {
-	placePicture ( position , 0.0 , mode );
+	placePicture ( x , y , 0.0f , mode );
 }
 
 int video ( char* videoname )
@@ -73,6 +106,8 @@ int video ( char* videoname )
 	while ( !nextInput.empty ( ) )
 	{
 		// - > faire les traitements sur l’image (prochaines étapes)
+
+		placePicture ( 0 , 0 , NEUTRAL );
 
 		// - > appeler la fonction de dessin
 		cv::imshow ( "input" , nextInput );
