@@ -29,12 +29,13 @@ enum Mode
 
 /// <summary>
 /// <para>Pour placer une image en surimpression de la vidéo.</para>
-/// <param name="position">Le centre du cercle à remplir avec une image.</param>
+/// <param name="x">Le centre du cercle à remplir avec une image.</param>
+/// <param name="y">Le centre du cercle à remplir avec une image.</param>
 /// <param name="angle">L'angle de rotation de l'image à incorporer.</param>
 /// <param name="radius">Le scale de l'image à effectuer.</param>
 /// <param name="mode">L'image à utiliser.</param>
 /// </summary>
-void placePicture ( int x , int y , float angle , float radius , Mode mode )
+void placePicture ( int x , int y , float radius , Mode mode )
 {
 	// Si pas d'image à mettre en superposition osef !
 	if ( mode == NONE )
@@ -60,22 +61,63 @@ void placePicture ( int x , int y , float angle , float radius , Mode mode )
 	}
 
 	// 1 load l'image nécessaire
-	cv::Mat img = cv::imread ( pathtoload );
-	cv::imshow ( "Output" , img );
+	cv::Mat img = cv::imread ( pathtoload , cv::IMREAD_UNCHANGED ) , imgresize , imgrotate;
 	// 2 resize l'image
-	// 3 rotate l'image
-	// 4 appliquer l'image
-}
+	float percent = radius / img.size ( ).height;
+	//imgresize = cv::Mat ( radius , radius , cv::IMREAD_UNCHANGED );
+	cv::resize ( img , imgresize , cv::Size ( ) , percent , percent );
 
-/// <summary>
-/// <para>Pour placer une image en surimpression de la vidéo.</para>
-/// <param name="position">Le centre du cercle à remplir avec une image.</param>
-/// <param name="angle">L'angle de rotation de l'image à incorporer.</param>
-/// <param name="mode">L'image à utiliser.</param>
-/// </summary>
-void placePicture ( int x , int y , float angle , Mode mode )
-{
-	placePicture ( x , y , angle , 10.0f , mode );
+	int xpos , ypos;
+	int xmin = x - imgresize.size ( ).width / 2;
+	int xmax = x + imgresize.size ( ).width / 2;
+	if ( xmin < 0 )
+	{
+		xpos = 0;
+	}
+	else if ( xmax > nextInput.size ( ).width )
+	{
+		xpos = nextInput.size ( ).width - imgresize.size ( ).width;
+	}
+	else
+	{
+		xpos = xmin;
+	}
+
+	int ymin = y - imgresize.size ( ).height / 2;
+	int ymax = y + imgresize.size ( ).height / 2;
+	if ( ymin < 0 )
+	{
+		ypos = 0;
+	}
+	else if ( ymax > nextInput.size ( ).height )
+	{
+		ypos = nextInput.size ( ).height - imgresize.size ( ).height;
+	}
+	else
+	{
+		ypos = ymin;
+	}
+
+	// 4 appliquer l'image
+	cv::Rect roi ( cv::Point ( xpos , ypos ) , imgresize.size ( ) );
+	cv::Mat4b temp = imgresize;
+	cv::Mat3b dst = nextInput ( roi );
+	double alpha = 1;
+	for ( int r = 0; r < dst.rows; ++r )
+	{
+		for ( int c = 0; c < dst.cols; ++c )
+		{
+			const cv::Vec4b& vf = temp ( r , c );
+			if ( vf [ 3 ] > 0 ) // alpha channel > 0
+			{
+				// Blending
+				cv::Vec3b& vb = dst ( r , c );
+				vb [ 0 ] = alpha * vf [ 0 ] + ( 1 - alpha ) * vb [ 0 ];
+				vb [ 1 ] = alpha * vf [ 1 ] + ( 1 - alpha ) * vb [ 1 ];
+				vb [ 2 ] = alpha * vf [ 2 ] + ( 1 - alpha ) * vb [ 2 ];
+			}
+		}
+	}
 }
 
 /// <summary>
@@ -85,7 +127,7 @@ void placePicture ( int x , int y , float angle , Mode mode )
 /// </summary>
 void placePicture ( int x , int y , Mode mode )
 {
-	placePicture ( x , y , 0.0f , mode );
+	placePicture ( x , y , 50.0f , mode );
 }
 
 int video ( char* videoname )
@@ -107,7 +149,7 @@ int video ( char* videoname )
 	{
 		// - > faire les traitements sur l’image (prochaines étapes)
 
-		placePicture ( 0 , 0 , NEUTRAL );
+		placePicture ( 50 , 50 , 50 , SMILE );
 
 		// - > appeler la fonction de dessin
 		cv::imshow ( "input" , nextInput );
