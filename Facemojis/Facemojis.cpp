@@ -102,7 +102,6 @@ void placePicture ( int x , int y , float radius , Mode mode )
 	cv::Rect roi ( cv::Point ( xpos , ypos ) , imgresize.size ( ) );
 	cv::Mat4b temp = imgresize;
 	cv::Mat3b dst = nextInput ( roi );
-	double alpha = 1;
 	for ( int r = 0; r < dst.rows; ++r )
 	{
 		for ( int c = 0; c < dst.cols; ++c )
@@ -112,9 +111,9 @@ void placePicture ( int x , int y , float radius , Mode mode )
 			{
 				// Blending
 				cv::Vec3b& vb = dst ( r , c );
-				vb [ 0 ] = alpha * vf [ 0 ] + ( 1 - alpha ) * vb [ 0 ];
-				vb [ 1 ] = alpha * vf [ 1 ] + ( 1 - alpha ) * vb [ 1 ];
-				vb [ 2 ] = alpha * vf [ 2 ] + ( 1 - alpha ) * vb [ 2 ];
+				vb [ 0 ] = vf [ 0 ];
+				vb [ 1 ] = vf [ 1 ];
+				vb [ 2 ] = vf [ 2 ];
 			}
 		}
 	}
