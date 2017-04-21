@@ -22,8 +22,10 @@ cv::Mat nextInput;
 cv::Mat gray;
 std::string face_cascade_name = "haarcascade_frontalface_alt2.xml";
 std::string eyes_cascade_name = "haarcascade_eye_tree_eyeglasses.xml";
+std::string smile_cascade_name = "haarcascade_smile.xml";
 cv::CascadeClassifier face_cascade;
 cv::CascadeClassifier eyes_cascade;
+cv::CascadeClassifier smile_cascade;
 
 
 /// <summary>
@@ -156,7 +158,7 @@ void detectAndDisplay ( cv::Mat frame )
 	cv::equalizeHist ( frame_gray , frame_gray );
 
 	//Detect Faces
-	face_cascade.detectMultiScale ( frame_gray , faces , 1.1 , 5 , 0 | CV_HAAR_SCALE_IMAGE , cv::Size ( 10 , 10 ) );
+	face_cascade.detectMultiScale ( frame_gray , faces , 1.5 , 4 , 0 | CV_HAAR_SCALE_IMAGE , cv::Size ( 20 , 20 ) );
 	//cv::imshow ( "input gray" , frame_gray );
 	//cv::waitKey();
 
@@ -174,19 +176,29 @@ void detectAndDisplay ( cv::Mat frame )
 			radius = faces [ i ].width;
 		}
 
-		placePicture ( center.x , center.y , radius , SMILE );
 		cv::Mat faceroi = frame_gray ( faces [ i ] );
 		std::vector<cv::Rect> eyes;
+		Mode m = NEUTRAL;
 
 	//	//-- In each face, detect eyes
-		/*eyes_cascade.detectMultiScale(faceroi, eyes, 1.1, 2, 0 | CV_HAAR_SCALE_IMAGE, cv::Size(30, 30));
+		/*eyes_cascade.detectMultiScale ( faceroi , eyes , 1.1 , 2 , 0 | CV_HAAR_SCALE_IMAGE , cv::Size ( 30 , 30 ) );
 
-		for (size_t j = 0; j < eyes.size(); j++)
+		for ( size_t j = 0; j < eyes.size ( ); j++ )
 		{
-			cv::Point center(faces[i].x + eyes[j].x + eyes[j].width*0.5, faces[i].y + eyes[j].y + eyes[j].height*0.5);
-			int radius = cvRound((eyes[j].width + eyes[j].height)*0.25);
-			circle(frame, center, radius, cv::Scalar(255, 0, 0), 4, 8, 0);
+			cv::Point center ( faces [ i ].x + eyes [ j ].x + eyes [ j ].width*0.5 , faces [ i ].y + eyes [ j ].y + eyes [ j ].height*0.5 );
+			int radius = cvRound ( ( eyes [ j ].width + eyes [ j ].height )*0.25 );
+			circle ( frame , center , radius , cv::Scalar ( 255 , 0 , 0 ) , 4 , 8 , 0 );
 		}*/
+
+		std::vector<cv::Rect> smiles;
+		smile_cascade.detectMultiScale ( faceroi , smiles , 1.1 , 1 , 0 | CV_HAAR_SCALE_IMAGE , cv::Size ( 5 , 5 ) );
+
+		if ( smiles.size ( ) > 0 )
+		{
+			m = SMILE;
+		}
+
+		placePicture ( center.x , center.y , radius , m );
 	}
 
 }
@@ -201,6 +213,10 @@ int video ( char* videoname )
 		printf ( "--(!)Error loading face \n" ); return -1;
 	};
 	if ( !eyes_cascade.load ( eyes_cascade_name ) )
+	{
+		printf ( "--(!)Error loading eye \n" ); return -1;
+	};
+	if ( !smile_cascade.load ( smile_cascade_name ) )
 	{
 		printf ( "--(!)Error loading eye \n" ); return -1;
 	};
