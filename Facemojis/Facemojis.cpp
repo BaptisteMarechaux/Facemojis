@@ -23,9 +23,11 @@ cv::Mat gray;
 std::string face_cascade_name = "haarcascade_frontalface_alt2.xml";
 std::string eyes_cascade_name = "haarcascade_eye_tree_eyeglasses.xml";
 std::string smile_cascade_name = "haarcascade_smile.xml";
+//std::string mouth_cascade_name = "haarcascade_mcs_mouth.xml";
 cv::CascadeClassifier face_cascade;
 cv::CascadeClassifier eyes_cascade;
 cv::CascadeClassifier smile_cascade;
+//cv::CascadeClassifier mouth_cascade;
 
 
 /// <summary>
@@ -177,10 +179,11 @@ void detectAndDisplay ( cv::Mat frame )
 		}
 
 		cv::Mat faceroi = frame_gray ( faces [ i ] );
-		std::vector<cv::Rect> eyes;
+		cv::Mat divide = faceroi ( cv::Rect ( 0 , faceroi.size ( ).height / 2 , faceroi.size ( ).width , faceroi.size ( ).height / 2 ) );
+		//std::vector<cv::Rect> eyes;
 		Mode m = NEUTRAL;
 
-	//	//-- In each face, detect eyes
+		//-- In each face, detect eyes
 		/*eyes_cascade.detectMultiScale ( faceroi , eyes , 1.1 , 2 , 0 | CV_HAAR_SCALE_IMAGE , cv::Size ( 30 , 30 ) );
 
 		for ( size_t j = 0; j < eyes.size ( ); j++ )
@@ -190,13 +193,21 @@ void detectAndDisplay ( cv::Mat frame )
 			circle ( frame , center , radius , cv::Scalar ( 255 , 0 , 0 ) , 4 , 8 , 0 );
 		}*/
 
+		/*std::vector<cv::Rect> mouths;
+		mouth_cascade.detectMultiScale ( faceroi , mouths , 1.5 , 4 , 0 | CV_HAAR_SCALE_IMAGE , cv::Size ( 20 , 20 ) );
+		//cv::imshow ( "input gray" , frame_gray );
+		//cv::waitKey();
+
+		for ( size_t i = 0; i < mouths.size ( ); i++ )
+		{*/
 		std::vector<cv::Rect> smiles;
-		smile_cascade.detectMultiScale ( faceroi , smiles , 1.1 , 1 , 0 | CV_HAAR_SCALE_IMAGE , cv::Size ( 5 , 5 ) );
+		smile_cascade.detectMultiScale ( divide , smiles , 1.1 , 1 , 0 | CV_HAAR_SCALE_IMAGE , cv::Size ( 5 , 5 ) );
 
 		if ( smiles.size ( ) > 0 )
 		{
 			m = SMILE;
 		}
+	//}
 
 		placePicture ( center.x , center.y , radius , m );
 	}
@@ -218,8 +229,12 @@ int video ( char* videoname )
 	};
 	if ( !smile_cascade.load ( smile_cascade_name ) )
 	{
-		printf ( "--(!)Error loading eye \n" ); return -1;
+		printf ( "--(!)Error loading smile \n" ); return -1;
 	};
+	/*if ( mouth_cascade.load ( mouth_cascade_name ) )
+	{
+		printf ( "--(!)Error loading mouth \n" ); return -1;
+	};*/
 
 	cap = cv::VideoCapture ( 1 ); //Camera frontale par défault de ma machine
 	if ( !cap.isOpened ( ) )
